@@ -37,10 +37,9 @@ func (r *resultWriter) Run(ctx context.Context, in <-chan scrapemate.Result) err
 
 func (r *resultWriter) saveEntry(ctx context.Context, entry *gmaps.Entry) error {
 	q := `INSERT INTO results
-		(cid, data)
+		(data)
 		VALUES
-		($1, $2) 
-		ON CONFLICT (cid) DO UPDATE SET data = EXCLUDED.data
+		($1) ON CONFLICT DO NOTHING
 		`
 
 	data, err := json.Marshal(entry)
@@ -48,7 +47,7 @@ func (r *resultWriter) saveEntry(ctx context.Context, entry *gmaps.Entry) error 
 		return err
 	}
 
-	_, err = r.db.ExecContext(ctx, q, entry.Cid, data)
+	_, err = r.db.ExecContext(ctx, q, data)
 
 	return err
 }
